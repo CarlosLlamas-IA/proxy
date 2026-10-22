@@ -1,0 +1,495 @@
+
+function FindProxyForURL(url, host) {
+
+    var privateIP = /^(0|10|127|192\.168|172\.1[6789]|172\.2[0-9]|172\.3[01]|169\.254|192\.88\.99)\.[0-9.]+$/;
+    var resolved_ip = dnsResolve(host);
+    var globalIP = /^185\.46\.212\.(88|89|90|91|92|93|97|98)$/;
+    var pachost = dnsResolve("pac.zscaler.net");
+    
+  
+    if (isPlainHostName(host))
+        return "DIRECT";
+    
+        // Direcciones locales
+    if ((host == "localhost") || shExpMatch(host, "*goskope.com*") || (shExpMatch(host, "localhost.*")) || (host == "127.0.0.1")) {
+       return "DIRECT";
+    }
+    
+    
+        //Delegaciones compras salida directa
+    if ((isInNet(myIpAddress(), "10.200.192.0", "255.255.255.0"))||(isInNet(myIpAddress(), "10.200.194.0", "255.255.255.0"))||
+            (isInNet(myIpAddress(), "10.200.193.0", "255.255.255.128"))||(isInNet(myIpAddress(), "10.200.198.0", "255.255.255.0"))||
+            (isInNet(myIpAddress(), "10.200.199.0", "255.255.255.128"))||(isInNet(myIpAddress(), "10.201.1.0", "255.255.255.0"))||
+            (isInNet(myIpAddress(), "172.26.65.17", "255.255.255.255"))||
+            (isInNet(myIpAddress(), "10.201.2.0", "255.255.128.0"))||(isInNet(myIpAddress(), "10.201.4.0", "255.255.255.0"))||
+            (isInNet(myIpAddress(), "10.201.6.0", "255.255.255.0"))||(isInNet(myIpAddress(), "10.201.8.0", "255.255.255.0"))||
+            (isInNet(myIpAddress(), "10.232.34.0", "255.255.255.192"))) {
+                return "DIRECT";
+                
+    }
+    
+    //VPN de Logitravel
+    if (isInNet(host, "172.25.0.0", "255.255.0.0") || isInNet(host, "172.24.0.0", "255.255.0.0") || isInNet(host, "172.18.5.0", "255.255.255.0")) {
+        return "DIRECT";
+    }
+    
+     //Global protect & other
+        if (shExpMatch(host, "*acceso.elcorteingles.es*") ||  shExpMatch(url, "*ecica.elcorteingles.es*") ||
+            shExpMatch(host, "*acceso2.elcorteingles.es*") ||  shExpMatch(url, "*s2s2.elcorteingles.es*") ||
+            shExpMatch(url, "*s2s.elcorteingles.es*") || shExpMatch(host, "*goskope.com*") ||
+            shExpMatch(host, "*events.goskope.com*") || shExpMatch(host, "*addon-elcorteingles-es.de.goskope.com*") ||
+            isInNet(host, "10.162.0.0", "255.255.0.0")) {
+
+                return "DIRECT";
+            }
+            
+     // If pac host is the Global IP we are in ECI Corporate Network
+    if (globalIP.test(pachost) || (dnsResolve("vecirep.eci.geci") == "10.12.207.25") || (dnsResolve("pac.zscaler.net") == "10.12.198.209")) {
+    
+      
+        // Excepcion a Excepciones 'DIrect'
+        if (shExpMatch(host, "*docxpresso.elcorteingles.es") ||
+        shExpMatch(host, "*docxpresso.pre.elcorteingles.es") || 
+        shExpMatch(host, "*.marketingecipro.crm4.dynamics.com") ||
+        shExpMatch(host, "*.msftconnecttest.com*") ||
+        shExpMatch(host, "*packages-pre.tourmundial.es*")
+        ) {
+                return "PROXY zsuser.eci.geci:80";
+            }
+  
+        // Excepcion a Excepciones 'DIrect' para PZEN
+        if (shExpMatch(host, "*informacioncorporativa.azure.cloud.elcorteingles.es*")
+        ) {
+                return "PROXY zsipprivate.eci.geci:80";
+            }
+  
+        //Excepciones para Nac y otras
+        if (shExpMatch(host, "nac.elcorteingles.es") ||  shExpMatch(url, "*identity-services.elcorteingles.es*") ||
+            shExpMatch(host, "*ocp-firefly.nft.hipercor.es") || shExpMatch(url, "*zonaempleado.elcorteingles.es*") ||
+            shExpMatch(host, "*.azure.firefly.elcorteingles.*") || shExpMatch(host, "*admin.sfera.com") || 
+            shExpMatch(host, "*nexodes.elcorteingles.es*") || shExpMatch(host, "*nexopre.elcorteingles.es*") || 
+            shExpMatch(host, "*nexo.nft.elcorteingles.es*") || shExpMatch(host, "*.azure.cloud.elcorteingles.es*") ||
+            shExpMatch(host, "*net0des.elcorteingles.es*") || shExpMatch(host, "*net0pre.elcorteingles.es*") || 
+            shExpMatch(host, "*zonab2edes.elcorteingles.es*") || shExpMatch(host, "*zonab2epre.elcorteingles.es*") || 
+            shExpMatch(host, "*.azure.cloud.*")  || shExpMatch(url, "*nexo.elcorteingles.es/jventaenproceso8*") ||
+            shExpMatch(url, "*portalgrupo.elcorteingles.es/jventaenproceso8*") || shExpMatch(host, "canaryxo.onmicrosoft.com*")||
+            shExpMatch(url, "*dashboard.cloud-cc.telefonica.es*")  || shExpMatch(url, "*grabaciones.cloud-cc.telefonica.es*") ||
+            shExpMatch(url, "*reports.cloud-cc.telefonica.es*") ||  shExpMatch(url, "*identity-services.uat.elcorteingles.es*") ||
+            shExpMatch(host, "*nexo.elcorteingles.es*")|| shExpMatch(host, "*enovia3d.elcorteingles.es*")||
+            shExpMatch(host, "*auxserver.database.windows.net") || shExpMatch(host, "*privatelink.database.windows.net") ||
+            shExpMatch(host, "*privatelink.snowflakecomputing.com") || shExpMatch(host, "mxcpd100*") || shExpMatch(host, "*ocp-firefly.hipercor.es") ||
+            shExpMatch(host, "*3dspace.elcorteingles.es*") || shExpMatch(host, "*3ddashboard.elcorteingles.es") ||
+            shExpMatch(host, "*3dpassport.elcorteingles.es") || shExpMatch(host, "*3dsearch.elcorteingles.es") ||
+            shExpMatch(host, "*fcs.elcorteingles.es") || shExpMatch(host, "*ocp-firefly.nft.elcorteingles.es") ||
+            shExpMatch(host, "*3dspace.pre.elcorteingles.es*") || shExpMatch(host, "*3ddashboard.pre.elcorteingles.es") ||
+            shExpMatch(host, "*3dpassport.pre.elcorteingles.es") || shExpMatch(host, "*3dsearch.pre.elcorteingles.es") ||
+            shExpMatch(host, "*enovia3d.pre.elcorteingles.es*")|| shExpMatch(host, "*fcs.pre.elcorteingles.es") ||
+            shExpMatch(host, "*wifieci.elcorteingles.es")|| shExpMatch(host, "*portalb2bpre.elcorteingles.es") ||
+            shExpMatch(host, "*sapfioripre.elcorteingles.es*") || shExpMatch(host, "*www.prod2.elcorteingles.es*") ||
+            shExpMatch(host, "*ocp-omnistore.nft.elcorteingles.es") || shExpMatch(host, "*ocp-omnistore.elcorteingles.es") ||
+            shExpMatch(host, "*ocp-omnistore.nft.hipercor.es") || shExpMatch(host, "*ocp-omnistore.hipercor.es") ||
+            shExpMatch(host, "*.autenticacionfecisanft.elcorteingles.es") || shExpMatch(host, "*www.nft.greencoastshop.com*") ||
+            shExpMatch(host, "*www.greencoastshop.com*") || shExpMatch(host, "*www.nft.lloydsthebrand.com*")|| shExpMatch(host, "*ocp-omnistore.hipercor.es") ||
+            shExpMatch(host, "*pre.tourmundial.es*") || shExpMatch(host, "*agencias.tourmundial.es*") || shExpMatch(host, "*ocp-omnistore.elcorteingles.es") ||
+            shExpMatch(host, "*db-pg-proepromvector.postgres.database.azure.com*") || shExpMatch(host, "*ocp-firefly.nft.elcorteingles.es *") ||
+            shExpMatch(host, "www.tourmundial.es*") || shExpMatch(host, "*masviajes.tourmundial.es*") || shExpMatch(host, "*ocp-firefly.elcorteingles.es") ||
+            shExpMatch(host, "*cotizaciones.tourmundial.es*") || shExpMatch(host, "*calidad.tourmundial.es*") || shExpMatch(host, "*.kisoft-genomix-val.cloud.knapp.com*") ||
+            shExpMatch(host, "*agenciaspre.tourmundial.es*") || shExpMatch(host, "*calidadpre.tourmundial.es*") ||
+            shExpMatch(host, "*cotizacionespre.tourmundial.es*") || shExpMatch(host, "*masviajespre.tourmundial.es*") || shExpMatch(host, "*agenciasint.tourmundial.es*") ||
+            shExpMatch(host, "*ocp-omnistore-vue.nft.elcorteingles.es") || shExpMatch(host, "*portalb2bdes.elcorteingles.es*") ||
+            shExpMatch(host, "*www.lloydsthebrand.com*") || shExpMatch(host, "*caaruatwebapps-activos-relvar.azurewebsites.net") ||
+            shExpMatch(host, "*eciwifi.elcorteingles.es") || shExpMatch(host, "*statics-fronts.elcorteingles.es*") ||
+            shExpMatch(host, "*.des-azspce.hipercor.es*") || shExpMatch(host, "*.pre-azspce.hipercor.es*") ||
+            shExpMatch(host, "*.pro-azspce.hipercor.es*") || shExpMatch(host, "*.des-azeuwe1.hipercor.es*") ||
+            shExpMatch(host, "*.des-onprem1.hipercor.es*") || shExpMatch(host, "*.pre-onprem1.hipercor.es*") ||
+            shExpMatch(host, "*.pro-onprem1.hipercor.es*") || shExpMatch(host, "*.des-azspce.elcorteingles.es*") ||
+            shExpMatch(host, "*.pre-azspce.elcorteingles.es*") || shExpMatch(host, "*.pro-azspce.elcorteingles.es*") ||
+            shExpMatch(host, "*.des-azeuwe1.elcorteingles.es*") || shExpMatch(host, "*.des-onprem1.elcorteingles.es*") ||
+            shExpMatch(host, "*.pre-onprem1.elcorteingles.es*") || shExpMatch(host, "*.pro-onprem1.elcorteingles.es*") ||
+            shExpMatch(host, "*des-global.elcorteingles.es*") || shExpMatch(host, "*des-global.elcorteingles.pt*") ||
+            shExpMatch(host, "*msh3-eci-pt-uat.des-global.elcorteingles.pt*") || shExpMatch(host, "*msh3-hipercor-uat.des.hipercor.es*") ||
+            isInNet(host, "161.13.78.7", "255.255.255.255") || isInNet(host, "161.10.78.81", "255.255.255.255") ||
+            shExpMatch(host, "*sso.des.elcorteingles.es") || shExpMatch(host, "*sso.elcorteingles.es") || 
+            shExpMatch(host, "*sso.pre.elcorteingles.es") || shExpMatch(host, "*sso.tourmundial.es") ||
+            shExpMatch(host, "*sapfiori.elcorteingles.es") ||
+            shExpMatch(host, "*zrupay.com*") ||
+            shExpMatch(host, "*synchrony.almeci.io*") || shExpMatch(host, "*bitbucket.almeci.io*") ||
+            shExpMatch(host, "*detect.adobedccdn.com*") ||  shExpMatch(host, "*identity-services-ai-nft.pre.elcorteingles.es*") ||
+            shExpMatch(host, "*www.mymutua.es*") || shExpMatch(host, "*detect.ffc.adobeoobe.com*") ||
+            shExpMatch(host, "*ea-eci.mutua.es*") || shExpMatch(host, "*wwwd.mymutua.es*") || shExpMatch(host, "*ewadm-eci.mutua.es*") || 
+            shExpMatch(host, "*ea-ecia.mutua.es*") || shExpMatch(host, "*wwwa.mymutua.es*") || shExpMatch(host, "*accessd.mutua.es*") ||
+            shExpMatch(host, "*accessa.mutua.es*") || shExpMatch(host, "*access.mutua.es*") || shExpMatch(host, "*local.connectme.us*") ||
+            shExpMatch(host, "*identity-services.nft.elcorteingles.es*") || shExpMatch(host, "*191543-es00615.af.cloud.knapp.com*") ||
+            shExpMatch(host, "*191543-es00615.mediaserver.cloud.knapp.com*") || shExpMatch(host, "*191543-es00615.command.cloud.knapp.com*") ||
+            shExpMatch(host, "*191543-es00615.genomix.cloud.knapp.com*") || shExpMatch(host, "*191543-es00615.corf.cloud.knapp.com*") ||
+            shExpMatch(host, "*csc.elcorteingles.es*") || shExpMatch(host, "*proveedorespre.elcorteingles.es*") ||
+			shExpMatch(host, "*ocp-backend.nft.elcorteingles.es*") || shExpMatch(host, "*ocp-food.elcorteingles.es*") ||
+			shExpMatch(host, "*ocp-non-food.elcorteingles.es*") || shExpMatch(host, "*ocp-food.nft.elcorteingles.es*") ||
+			shExpMatch(host, "*ocp-omnistore.elcorteingles.pt*") || shExpMatch(host, "*ocp-firefly.elcorteingles.pt*") ||
+			isInNet(host, "10.59.1.1", "255.255.255.255") || shExpMatch(host, "*docxpresso.pre.elcorteingles.es*") ||
+			shExpMatch(host, "*cuenta.uat.sfera.com*") || shExpMatch(host, "*ocp-my-account.nft.elcorteingles.es*") ||
+			shExpMatch(host, "*ocp-manager.nft.elcorteingles.es*") || shExpMatch(host, "*ocp-manager.elcorteingles.es*") ||
+			shExpMatch(host, "*pre-azspce.elcorteingles.es*") || shExpMatch(host, "*pre-global.elcorteingles.es*") ||
+			shExpMatch(host, "*pre-azspce.elcorteingles.pt*") || shExpMatch(host, "*pre-global.elcorteingles.pt*") ||
+			shExpMatch(host, "*pre-azspce.hipercor.es*") || shExpMatch(host, "*pre-global.hipercor.es*") ||
+			shExpMatch(host, "*pre-azspce.primeriti.es*") || shExpMatch(host, "*pre-global.primeriti.es*") ||
+			shExpMatch(host, "*pre-azspce.sfera.com*") || shExpMatch(host, "*pre-global.sfera.com*") ||
+			shExpMatch(host, "*pro-azspce.elcorteingles.es*") || shExpMatch(host, "*pro-global.elcorteingles.es*") ||
+			shExpMatch(host, "*pro-azspce.elcorteingles.pt*") || shExpMatch(host, "*pro-global.elcorteingles.pt*") ||
+			shExpMatch(host, "*pro-azspce.hipercor.es*") || shExpMatch(host, "*pro-global.hipercor.es*") ||
+			shExpMatch(host, "*pro-azspce.primeriti.es*") || shExpMatch(host, "*pro-global.primeriti.es*") ||
+			shExpMatch(host, "*pro-azspce.sfera.com*") || shExpMatch(host, "*pro-global.sfera.com*") ||
+			shExpMatch(host, "*cuenta.ave.elcorteingles.es.test*") ||
+			shExpMatch(host, "*csc.nft.elcorteingles.es*")) {
+                return "DIRECT";
+            }
+    
+        //seguros por Macrolan 
+        if (shExpMatch(host, "comunicacion.seguros.elcorteingles.es*") || shExpMatch(host, "*des.seguros.elcorteingles.es*") ||
+            shExpMatch(host, "*nft.seguros.elcorteingles.es*") || shExpMatch(host, "*tarificador.seguros.elcorteingles.es*") ||
+            shExpMatch(host, "*nft.seseci.seguros.elcorteingles.es*") ||
+            shExpMatch(host, "*int.seguros.elcorteingles.es*") || shExpMatch(host, "*int.test.seguros.elcorteingles.es*") ||
+            shExpMatch(host, "*nft.test.seguros.elcorteingles.es*")) {
+                return "DIRECT";
+            }
+    
+        // Se incluye dominio dam.elcorteingles.es para que salga por zsuser ya que con la siguiente regla se estaba excluyendo
+	    if (shExpMatch(host, "dam.elcorteingles.es*")) {
+	             return "PROXY zsuser.eci.geci:80";
+            }
+
+        //Mapfre Seguros
+        if (((isInNet(host, "172.16.0.0", "255.240.0.0"))&&(!(shExpMatch(host, "wmediadores.mapfre.com"))))) {
+    	    return "DIRECT";
+        }
+    
+        // acceso Red Storeflow y Admon CC.CC
+        if (shExpMatch(host, "*.1.1") || shExpMatch(host, "*.250.250")) {
+            return "DIRECT";
+        }
+        
+       
+       // Excepcion a Defender para conexiones a sharepoint 
+        if (shExpMatch(host, "*eu-mobile.events.data.microsoft.com")) {
+                return "PROXY zsuser.eci.geci:80";
+            }
+      
+       
+       // Dominios de Defender solicitados por Microsoft y que deben salir a través de zsmde 
+        if (shExpMatch(host, "*events.data.microsoft.com") || shExpMatch(host, "*settings-win.data.microsoft.com") ||
+            shExpMatch(host, "*x.cp.wd.microsoft.com") || shExpMatch(host, "*.cdn.x.cp.wd.microsoft.com") || shExpMatch(host, "*officecdn-microsoft-com.akamaized.net") ||
+            shExpMatch(host, "*packages.microsoft.com") || shExpMatch(host, "*europe.x.cp.wd.microsoft.com") || shExpMatch(host, "*wdcp.microsoft.com") ||
+            shExpMatch(host, "*winatp-gw-neu.microsoft.com") || shExpMatch(host, "*winatp-gw-weu.microsoft.com") ||
+            shExpMatch(host, "*winatp-gw-neu3.microsoft.com") || shExpMatch(host, "*winatp-gw-weu3.microsoft.com") || shExpMatch(host, "*automatedirstrprdneu.blob.core.windows.net") || shExpMatch(host, "*automatedirstrprdweu.blob.core.windows.net") ||
+            shExpMatch(host, "*automatedirstrprdneu3.blob.core.windows.net") || shExpMatch(host, "*automatedirstrprdweu3.blob.core.windows.net") || shExpMatch(host, "*usseu1northprod.blob.core.windows.net") ||
+            shExpMatch(host, "*wseu1northprod.blob.core.windows.net") || shExpMatch(host, "*usseu1westprod.blob.core.windows.net") ||
+            shExpMatch(host, "*crl.microsoft.com") || shExpMatch(host, "*ctldl.windowsupdate.com") || shExpMatch(host, "*dm.microsoft.com") ||
+            shExpMatch(host, "*wseu1westprod.blob.core.windows.net") || shExpMatch(host, "*definitionupdates.microsoft.com") || shExpMatch(host, "*wd.microsoft.com")) {
+                return "PROXY zsmde.eci.geci:80";
+            }
+       
+        /* Forward Web Traffic to Internal Domains to ECI's on-prem proxy */
+    
+    
+        // Dominios locales
+        if (shExpMatch(host, "*elcorteingles.int") || shExpMatch(host, "*.ieci.int") ||
+            shExpMatch(host, "*.cerasa.int") || shExpMatch(host, "*.remoto.int") || shExpMatch(host, "*.tourmundial.int") ||
+            shExpMatch(host, "*viajes.int") || shExpMatch(host, "*viajeselcorteingles.int") || shExpMatch(host, "*.corp") ||
+            shExpMatch(host, "*geci") || shExpMatch(host, "*mx0037109pc0004*") ||
+            shExpMatch(host, "*.des") || shExpMatch(host, "*.lab") || shExpMatch(host, "*.pre") || shExpMatch(host, "*.test") ||
+            shExpMatch(host, "s2s.elcorteingles.es") || shExpMatch(host, "acceso.elcorteingles.es") || shExpMatch(host, "*.tra") ||
+            shExpMatch(host, "*.induyco.*") || shExpMatch(host, "*optenetstop.eci.geci") || 
+			shExpMatch(host, "*claude*") || shExpMatch(host, "*chatgpt*"))
+			{
+                return "DIRECT";
+            }
+        
+        //Excepciones persistencia
+        if (shExpMatch(host, "*.traceone.com*") || shExpMatch(host, "*.dialoga.io*") || shExpMatch(host, "*livenergy.es*") ||
+        shExpMatch(host, "*odin.redsys.es*") || shExpMatch(host, "*agencias.renfe.com*") || shExpMatch(host, "*.dynamics.com*") ||
+        shExpMatch(host, "*.grandvisionspain.es*") || shExpMatch(host, "*.visualstudio.com*") || shExpMatch(host, "*experienciadecliente.elcorteingles.es*") ||
+        shExpMatch(host, "*.traceone.net*") || shExpMatch(host, "*firmaprofesional.com*") || shExpMatch(host, "*firmapro.com*")){
+            return "PROXY zsuser1.eci.geci:80";
+        }
+        
+        
+        //Excepciones persistencia zsuser2
+        if (shExpMatch(host, "*wmediadores.mapfre.com*") 
+        ) {
+            return "PROXY zsuser2.eci.geci:80";
+        }
+        
+        //Excepciones para evitar salida por PZEN
+	    if (shExpMatch(host, "*hotelbarcelonaprincess.com*") 
+        ) {
+            return "PROXY zsuser.eci.geci:80";
+        }
+
+
+       
+// A partir de este punto van las URL del negocio que necesitan control por IP - WhiteListing (Private ZEN)
+        if (shExpMatch(host, "*.adquira.com*") || shExpMatch(host, "*.aduana.gob.bo*") ||
+			shExpMatch(host, "*.aenor.com*") || shExpMatch(host, "*.altabox.net*") ||
+			shExpMatch(host, "*.appspot.com*") || shExpMatch(host, "*.as400.jumbotours.com*") ||
+			shExpMatch(host, "*.asemeservicios.com*") || shExpMatch(host, "*.autodesk.com*") ||
+			shExpMatch(host, "*.axesor360.axesor.com*") || shExpMatch(host, "*.aytona.com*") ||
+			shExpMatch(host, "*.bambuser.com*") || shExpMatch(host, "*.blundstone.es*") ||
+			shExpMatch(host, "*.bportugal.net*") || shExpMatch(host, "*.cadit.es*") ||
+			shExpMatch(host, "*.dirtrab.cl*") || shExpMatch(host, "*.easytravelsystem.com*") ||
+			shExpMatch(host, "*.emileetida.com*") || shExpMatch(host, "*.europ-assistance.com*") ||
+			shExpMatch(host, "*.grupogss.com*") || shExpMatch(host, "*.haier.pt*") ||
+			shExpMatch(host, "*.herokuapp.com*") || shExpMatch(host, "*.infotrust.pt*") ||
+			shExpMatch(host, "*.institutofomentomurcia.es*") || shExpMatch(host, "*.iuritexcloud.com*") ||
+			shExpMatch(host, "*.justicia.es*") || shExpMatch(host, "*.justiciaencanarias.es*") ||
+			shExpMatch(host, "*.kinto.azure.firefly.elcorteingles.es") || shExpMatch(host, "*.mailjet.com*") ||
+			shExpMatch(host, "*.marratxi.es*") || shExpMatch(host, "*.mastercard.com*") ||
+			shExpMatch(host, "*.maven.apache.org*") || shExpMatch(host, "*.meh.es*") ||
+			shExpMatch(host, "*movelia.es") || shExpMatch(host, "*.modirum.com*") ||
+			shExpMatch(host, "*congresosefq.org*") || shExpMatch(host, "*contrataciondelestado.es*") ||
+            shExpMatch(host, "*conxemar2023accommodation.com*") || shExpMatch(host, "*cp.amadeusasia.com*") ||
+            shExpMatch(host, "*cp.amadeuses.com*")  || shExpMatch(host, "*crossboard.tackops.com*") ||
+            shExpMatch(host, "*crossteam.tackops.com*") || shExpMatch(host, "*cuenta.greencoastshop.com*") ||
+            shExpMatch(host, "*cuenta.lloydsthebrand.com*") || shExpMatch(host, "*cuenta.nft.greencoastshop.com*") ||
+            shExpMatch(host, "*cuenta.nft.lloydsthebrand.com*") || shExpMatch(host, "*cytric-renfe.amadeuses.com*") ||
+            shExpMatch(host, "*dashboard.wejazz.es*") || shExpMatch(host, "*destinoamerica.es*") ||
+            shExpMatch(host, "*dguadalajara.sedelectronica.es*") || shExpMatch(host, "*directoatusclientes.com*") ||
+            shExpMatch(host, "*dlgen2caarnftew.blob.core.windows.net*") || shExpMatch(host, "*dlgen2caarproew.blob.core.windows.net*") ||
+            shExpMatch(host, "*dlgen2caaruatew.blob.core.windows.net*") || shExpMatch(host, "*ecipay.es*") ||
+	        shExpMatch(host, "*mioprogeneralstorage.blob.core.windows.net") || shExpMatch(host, "*stgdamdes001.blob.core.windows.net") ||
+            shExpMatch(host, "*eciqv.aitex.es*") || shExpMatch(host, "*ecis.inteliens.com*") || shExpMatch(host, "*blob.ams22prdstr06a.store.core.windows.net*") ||
+            shExpMatch(host, "*edicomgroup.com*") || shExpMatch(host, "*elcorteinglespay.es*") || shExpMatch(host, "*turismograncanaria.sedelectronica.es*") ||
+            shExpMatch(host, "*e-pacallianz.com*") || shExpMatch(host, "*eu-api.experian.com*") ||
+            shExpMatch(host, "*europ-assistance.es*") || shExpMatch(host, "*evisa.gov.kh*") ||
+            shExpMatch(host, "*extranet2.guardiacivil.es*") || shExpMatch(host, "*fecisa.mobbeel.com*") ||
+            shExpMatch(host, "*fitnessdigital.com*") || shExpMatch(host, "*fwazurepublic1.westeurope.cloudapp.azure.com*") ||
+            shExpMatch(host, "*fwazurepublic2.westeurope.cloudapp.azure.com*") || shExpMatch(host, "*grupoply.pelayo.com*") ||
+            shExpMatch(host, "*hotelresb2b.com")|| shExpMatch(host, "*hotelresb2b.com*") ||
+            shExpMatch(host, "*identity-services.nft.financieraelcorteingles.es*") || shExpMatch(host, "*identity-services.uat.financieraelcorteingles.es*") ||
+            shExpMatch(host, "*idonia.com*") || shExpMatch(host, "*iryoseco.amadeuses.com*") ||
+            shExpMatch(host, "*kerrylogistics.es*") ||
+            shExpMatch(host, "*leisuretravel.ecitravel*") || shExpMatch(host, "*licitacion.usal.es*") ||
+            shExpMatch(host, "*live.admira.mobi*") || shExpMatch(host, "*mediadores.asisa.es*") ||
+            shExpMatch(host, "*mediadores.axa.es*") || shExpMatch(host, "*.ocaso.es*") ||
+            shExpMatch(host, "*metabolismodelnitrogenocordoba2020.es*") || shExpMatch(host, "*mmportal.mutua.es*") ||
+            shExpMatch(host, "*movelia.es") || shExpMatch(host, "*mscholarconferences.com*") || shExpMatch(host, "*mundored.es*") ||
+            shExpMatch(host, "*nft.elcorteingles.pt*") || shExpMatch(host, "*nft.es1.es*") ||
+            shExpMatch(host, "*nielseniq.com*") || shExpMatch(host, "*noonspain.com*") ||
+            shExpMatch(host, "*odin-i.redsys.es*") || shExpMatch(host, "*optica2000.timegrip.com*") ||
+            shExpMatch(host, "*ost.lexisnexisrisk.eu*") || shExpMatch(host, "*pasarelapagospre.elcorteingles.es*") ||
+            shExpMatch(host, "*portal.azure.com*") || shExpMatch(host, "*portal.azure.net*") ||
+            shExpMatch(host, "*portalweb.prpmalaga.es*") || shExpMatch(host, "*pre-areacliente.swenoenergia.es*") ||
+            shExpMatch(host, "*privatelink.blob.core.windows.net*") || shExpMatch(host, "*privatelink.database.core.windows.net*") ||
+            shExpMatch(host, "*privatelink.dfs.core.windows.net*") || shExpMatch(host, "*privatelink.file.core.windows.net*") ||
+            shExpMatch(host, "*privatelink.table.core.windows.net*") || shExpMatch(host, "*puertohuelva.gob.es*") ||
+            shExpMatch(host, "*railclick.com*") || shExpMatch(host, "*renattandgo.com*") ||
+            shExpMatch(host, "*renfe.tpvpc.redsys.es*") || shExpMatch(host, "*reservaciones.tourmundial.cl") ||
+            shExpMatch(host, "*reservaciones.tourmundial.mx")|| shExpMatch(host, "*residentes.amadeuses.com*") ||
+            shExpMatch(host, "*restel.global*") || shExpMatch(host, "*restelhotels.com*") ||
+            shExpMatch(host, "*royalcaribbean.com*") || shExpMatch(host, "*s1-eu.ariba.com*") ||
+            shExpMatch(host, "*sanitas.es*") || shExpMatch(host, "*scalperscompany.com*") ||
+            shExpMatch(host, "*sede.gobex.es*") || shExpMatch(host, "*segelevia.com*") ||
+            shExpMatch(host, "*sertifi.com*") || shExpMatch(host, "*servicios.tesoro.es*") ||
+            shExpMatch(host, "*setcor.org*") || shExpMatch(host, "*shop.cinesa.es*") ||
+            shExpMatch(host, "*solicitudesbpo.covisian-ts.com*") || shExpMatch(host, "*solicitudesveci.com.mx*") ||
+            shExpMatch(host, "*suscripcion.adeslas.es*") ||
+            shExpMatch(host, "*teldartravel.com*") || shExpMatch(host, "*terminalweb.reduniq.pt*") ||
+            shExpMatch(host, "*turitravel.com*") ||shExpMatch(host, "*una.holos.pt*") ||
+            shExpMatch(host, "*unaseguros.pt*") || shExpMatch(host, "*vidamovida.com*") ||
+            shExpMatch(host, "*vivaaerobus.com*") || shExpMatch(host, "*volotea.com") ||
+            shExpMatch(host, "*w4.renfe.es*") || shExpMatch(host, "*web.parcelges.com*") ||
+            shExpMatch(host, "*web.sedeb2b.com*") || shExpMatch(host, "*wsp.registradores.org*") ||
+            shExpMatch(host, "193.254.30.37") || shExpMatch(host, "andratx.sedelectronica.es") ||
+            shExpMatch(host, "contratacion.umivale.es*") || shExpMatch(host, "ocsp.accv.es") ||
+            shExpMatch(host, "preapp.seg-social.pt*") || shExpMatch(host, "siscv.san.gva.es") ||  
+            shExpMatch(host, "www.destinosdelmundo.es") || shExpMatch(host, "www.nft.ecipay.es*") ||
+            shExpMatch(host, "www.uat.ecipay.es*")||
+            shExpMatch(host, "*.clubdevacaciones.es*") || shExpMatch(host, "*.joinup.es*") ||
+            shExpMatch(host, "*.muchosol.*") || shExpMatch(host, "*.tourmundial.es*") ||
+            shExpMatch(host, "*.viajeselcorteingles.es*") || shExpMatch(host, "*agencias.aireuropa.com*")||
+            shExpMatch(host, "*agencias.fredolsen.es*") || shExpMatch(host, "*agencias.navieraarmas.com*")||
+            shExpMatch(host, "*agencias.trasmed.com*") || shExpMatch(host, "*agents.viajeselcorteingles.es*") ||
+            shExpMatch(host, "*bedsonline.com*") || shExpMatch(host, "*booking.balearia.com") ||
+            shExpMatch(host, "*booking.clubdevacaciones.es") || shExpMatch(host, "*caribeb2b.viajeselcorteingles.es") ||
+            shExpMatch(host, "*catai.es*") || shExpMatch(host, "*central.clubdevacaciones.es") ||
+            shExpMatch(host, "*click4wheels.es*") || shExpMatch(host, "*contribucion.viajeselcorteingles.es*") ||
+            shExpMatch(host, "*contribucion-pre.viajeselcorteingles.es*") || shExpMatch(host, "*contribucionwcs.viajeselcorteingles.es*") ||
+            shExpMatch(host, "*contribucionwcs-pre.viajeselcorteingles.es*") || shExpMatch(host, "*dialoga.io") ||
+            shExpMatch(host, "*dotwconnect.com*") || shExpMatch(host, "*empresas.viajeselcorteingles.*") ||
+            shExpMatch(host, "*images.viajeselcorteingles.com*") || shExpMatch(host, "*images-pre.viajeselcorteingles.com*") ||
+            shExpMatch(host, "*incorporatepymes-pre.viajeselcorteingles.es*") || shExpMatch(host, "*intranet.clubdevacaciones.es*") ||
+            shExpMatch(host, "*intranet-dev.viajeselcorteingles.es*") || shExpMatch(host, "*intranet-pre.viajeselcorteingles.es*") ||
+            shExpMatch(host, "*marsol.com*") || shExpMatch(host, "*qa-agents.viajeselcorteingles.es*") ||
+            shExpMatch(host, "*support-pre.viajeselcorteingles.es*") || shExpMatch(host, "*teldartravel.com")||
+            shExpMatch(host, "*utopica.travel*") || shExpMatch(host, "*veciautotkt.amadeuses.com*") ||
+            shExpMatch(host, "*vecincoming.com") || shExpMatch(host, "*vecisa.bookohotel.com") ||
+            shExpMatch(host, "*viajeselcorteingleslatam.com*") || shExpMatch(host, "*view.logitravelgroup.com*") ||
+            shExpMatch(host, "*websales.eventim.com*")|| shExpMatch(host, "*webservices.elcorteingles.es") ||
+            shExpMatch(host, "*webservices.viajeselcorteingles.es")|| shExpMatch(host, "*webservices-pre.viajeselcorteingles.es")||
+            shExpMatch(host, "*www-des.viajeselcorteingles.es*")|| shExpMatch(host, "*www-pre.vacacioneseci.es*") ||
+            shExpMatch(host, "*optica2000.tematicasoftware.com*")|| shExpMatch(host, "*optica2000p.visualgesopt.com*")||
+            shExpMatch(host, "*web.parcelges.com*") || shExpMatch(host, "*crossboard.taicaro.incibe-cert.esckops.com*") ||
+            shExpMatch(host, "*ayto-arroyomolinos.org*") || shExpMatch(host, "*opendata.aemet.es*") ||
+    	    shExpMatch(host, "*storage.googleapis.com*") ||	
+    	    shExpMatch(host, "*catalogo.noe-sm.com*") || shExpMatch(host, "*logitravel.com*") ||
+    	    shExpMatch(host, "*bylogitravel.com*") || shExpMatch(host, "*logitravel.com.mx*") ||
+    	    shExpMatch(host, "*logitravel.com.br*") || shExpMatch(host, "*mastercard.com.au*") ||
+    	    shExpMatch(host, "*6eis.es*") || shExpMatch(host, "*numericco.eu*") ||
+    	    shExpMatch(host, "*lite.nft.elcorteingles.es*") || shExpMatch(host, "*oneboxtds.net*") ||
+    	    shExpMatch(host, "*entradas.uat.elcorteingles.es*") || shExpMatch(host, "*autenticacion.nft.financieraelcorteingles.es*") ||
+    	    shExpMatch(host, "*webevolve.uat.financieraelcorteingles.es*") || shExpMatch(host, "*webevolve.nft.financieraelcorteingles.es*") ||
+    	    shExpMatch(host, "*webevolve.nft2.financieraelcorteingles.es*") || shExpMatch(host, "*financieraecicontactcenter.my.salesforce.com*") ||
+			shExpMatch(host, "*rdweb.wvd.microsoft.com*") || shExpMatch(host, "*login.mypurecloud.ie*") ||
+			shExpMatch(host, "*admin.mpts.modirum.com*") || shExpMatch(host, "*dashboard.stripe.com*") ||
+			shExpMatch(host, "*mastercardconnect.com*") || shExpMatch(host, "*mc.exacttarget.com*") ||
+			shExpMatch(host, "*wb.mptse.mastercard.com*") || shExpMatch(host, "*recoveryfeci.pfsgroup.es*") ||
+			shExpMatch(host, "*corteingles.reexdoc.ai*") || shExpMatch(host, "*pre-corteingles.reexdoc.ai*") ||
+			shExpMatch(host, "*app.evicertia.com*") || shExpMatch(host, "*confirmafr.com*") ||
+			shExpMatch(host, "*iovation.com*") || shExpMatch(host, "*transunion.com*") ||
+			shExpMatch(host, "*dev-corteingles.reexdoc.ai*") || shExpMatch(host, "*galapagar.es*") ||
+			shExpMatch(host, "*gateway.nft.elcorteingles.es*") || shExpMatch(host, "*congresoaeaserod.es*") ||
+			shExpMatch(host, "*webevolveonp.nft.financieraelcorteingles.es*") || shExpMatch(host, "*www.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*storagehbenpro.blob.core.windows.net*") || shExpMatch(host, "*storagehbensta.blob.core.windows.net*") ||
+			shExpMatch(host, "*es.kln.com*") || shExpMatch(host, "*www.nft.sfera.com*") ||
+			shExpMatch(host, "*logalty.net*") || shExpMatch(host, "*mft.ryanair.com*") ||
+			shExpMatch(host, "*pre-aem.iberiagencias.com*") || shExpMatch(host, "*nwa.pre.iberiagencias.services.aws.iberia.com*") ||
+			shExpMatch(host, "*iberia--full.sandbox.my.site.com*") || shExpMatch(host, "*iberia.my.site.com*") ||
+			shExpMatch(host, "*beta.sfera.com*") || shExpMatch(host, "*api-dbx-es-preprod.idtgv.com*") ||
+			shExpMatch(host, "*ouigo-es-portal-preprod.idtgv.com*") || shExpMatch(host, "*generali.es*") ||
+			shExpMatch(host, "*guiaeci-legacy.interacso.dev*") || shExpMatch(host, "*guiaeci-cms.interacso.dev*") ||
+			shExpMatch(host, "*guiaeci.interacso.dev*") || shExpMatch(host, "*cuenta.nft.sfera.com*") ||
+			shExpMatch(host, "*agencias.ouigo.com*") || shExpMatch(host, "*api-dbx-es.ouigo.com*") || 
+			shExpMatch(host, "*mc.s51.exacttarget.com*") || shExpMatch(host, "*sso.mutua.es*") ||
+			shExpMatch(host, "*rccl.com*") || shExpMatch(host, "*istinfor.com*") ||
+			shExpMatch(host, "*ai-manager-nft.pre.elcorteingles.es*") || shExpMatch(host, "*ai-manager-uat.des.elcorteingles.es*") ||
+		    shExpMatch(host, "*cruiseplatform.com*") || shExpMatch(host, "*azamara.com*") ||
+		    shExpMatch(host, "*azamara.online*") || shExpMatch(host, "*carnivalcruiseline.de*") ||
+		    shExpMatch(host, "*carnivalukgroup.com*") || shExpMatch(host, "*princess.com*") ||
+		    shExpMatch(host, "*croisieurope.work*") || shExpMatch(host, "*api1.mutua.es*") ||
+		    shExpMatch(host, "*.sellingplatformconnect.amadeus.com*") || shExpMatch(host, "*emailwizard.genesyscsp.com*") ||
+		    shExpMatch(host, "*clientesviajeselcorteingles.lightning.force.com*") || shExpMatch(host, "*api-manager-adp.financieraelcorteingles.es*") ||
+		    shExpMatch(host, "*ec2-18-199-202-211.eu-central-1.compute.amazonaws.com*") || shExpMatch(host, "*ec2-3-120-143-177.eu-central-1.compute.amazonaws.com*") ||
+		    shExpMatch(host, "*apisearch.saveatrain.com*") || shExpMatch(host, "*satvendorstest.saveatrain.com*") ||
+		    shExpMatch(host, "*apibook.saveatrain.com*") || shExpMatch(host, "*xml-wfe-dev.grimaldi-app.com*") ||
+		    shExpMatch(host, "*api.grimaldines.com*") || shExpMatch(host, "*sit-integration-gateway.fr163-96.ryanair.com*") ||
+		    shExpMatch(host, "*ts-sit.fr162-0.ryanair.com*") || shExpMatch(host, "*uat-integration-gateway.fr163-96.ryanair.com*") ||
+		    shExpMatch(host, "*ts-uat.fr166-0.ryanair.com*") || shExpMatch(host, "*integration-gateway.ryanair.com*") ||
+		    shExpMatch(host, "*ts.ryanairpi.com*") || shExpMatch(host, "*ndc2.prod.vy.navitaire.com*") ||
+		    shExpMatch(host, "*ndc.vueling.app*") || shExpMatch(host, "*ndc2.test.vy.navitaire.com*") ||
+		    shExpMatch(host, "*ndc-cert.vueling.app*") || shExpMatch(host, "*pre.resevo.gnv.it*") ||
+		    shExpMatch(host, "*autenticacion.nft.financieraelcorteingles.es*") || shExpMatch(host, "*autenticacion.uat.financieraelcorteingles.es*") ||
+		    shExpMatch(host, "*api-manager.adp.financieraelcorteingles.es*") || shExpMatch(host, "*identity-services.financieraelcorteingles.es*") ||
+		    shExpMatch(host, "*api-manager-legacy-uat.des.elcorteingles.es*") || shExpMatch(host, "*api-manager-legacy-nft.pre.elcorteingles.es*") ||
+            isInNet(host, "50.19.217.166", "255.255.255.255") || isInNet(host, "185.76.213.191", "255.255.255.255") ||
+            isInNet(host, "103.211.93.145", "255.255.255.255") || isInNet(host, "203.76.124.58", "255.255.255.255") || 
+            isInNet(host, "121.240.111.18", "255.255.255.255") || isInNet(host, "14.136.222.26", "255.255.255.255") || 
+            isInNet(host, "103.211.93.145", "255.255.255.255") || isInNet(host, "142.154.220.82", "255.255.255.255") ||
+            isInNet(host, "52.129.96.0", "255.255.240.0") || isInNet(host, "169.150.104.0", "255.255.248.0") ||
+            isInNet(host, "77.240.114.105", "255.255.255.255") || isInNet(host, "213.27.194.44", "255.255.255.255") ||
+            isInNet(host, "52.47.195.190", "255.255.255.255") || isInNet(host, "52.47.171.109", "255.255.255.255") ||
+            isInNet(host, "185.76.214.101", "255.255.255.255") || isInNet(host, "185.76.214.115", "255.255.255.255") ||
+            isInNet(host, "95.60.131.166", "255.255.255.255") || isInNet(host, "77.227.61.23", "255.255.255.255") ||
+            isInNet(host, "46.221.62.50", "255.255.255.255") || isInNet(host, "58.32.235.146", "255.255.255.255") ||
+            shExpMatch(host, "*confluence.almeci.io*") || shExpMatch(host, "*jira.almeci.io*") ||
+            shExpMatch(host, "*clientes.inc.cl*") || shExpMatch(host, "*wonderbox.pro*") ||
+            shExpMatch(host, "*eu.promo.relexsolutions.com*") || shExpMatch(host, "*eci.test.plan.relexsolutions.com*") ||
+            shExpMatch(host, "*eci.prod.plan.relexsolutions.com*") ||
+			shExpMatch(host, "*.byhours.com*") || shExpMatch(host, "*.poscityexpert.com*") || shExpMatch(host, "*apps-historicoad-abg-weu.azurewebsites.net*") ||
+			shExpMatch(host, "*icaro.incibe-cert.es*") || shExpMatch(host, "*.precityexws.cityssdev.com*") ||
+			shExpMatch(host, "*bibliosalud2023.com*") || shExpMatch(host, "*beta.nft.elcorteingles.es*") ||
+			shExpMatch(host, "*sonora.gob.mx*") || shExpMatch(host, "*api.travelplanet.click*") || 
+			shExpMatch(host, "*izenpe.com*") || shExpMatch(host, "*.alhambra-patronato.es*") ||
+			shExpMatch(host, "*aplicaciones.mutua.es*") ||
+			shExpMatch(host, "*estudioeci.admira.com*") || shExpMatch(host, "*sftp.eci.encode.eu*") ||
+			shExpMatch(host, "*informacioncorporativa.azure.cloud.elcorteingles.es*") ||
+			shExpMatch(host, "*.smartgyro.es*") || shExpMatch(host, "*elparking.com*") ||
+			shExpMatch(host, "*nocodb.kumonetworks.es*") || shExpMatch(host, "*.peakon.com*") ||
+			shExpMatch(host, "*beta.comunicacion.seguros.elcorteingles.es*") || shExpMatch(host, "*beta.notequedessinseguro.com*") ||
+			shExpMatch(host, "*cobra.saviaam.com*") || shExpMatch(host, "*www-pre.viajeselcorteingles.es*") ||
+			shExpMatch(host, "*api-manager-adp-nft.pre.financieraelcorteingles.es*") || shExpMatch(host, "*api-manager-adp-uat.des.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*api-manager-adp.nft.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*api-manager-nft.pre.financieraelcorteingles.es*") || shExpMatch(host, "*api-manager-uat.des.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*api-manager.nft.financieraelcorteingles.es*") || shExpMatch(host, "*api-manager.uat.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*identity-services-nft.pre.financieraelcorteingles.es*") || shExpMatch(host, "identity-services-uat.des.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*locky.westeurope.cloudapp.azure.com*") ||
+			shExpMatch(host, "*identity-services.nft.financieraelcorteingles.es*") || shExpMatch(host, "*api-manager-adp.financieraelcorteingles.es*") ||
+			shExpMatch(host, "*beta.seguroseci.com*") ||  shExpMatch(host, "*seci-dev.talentomobile.com*") ||
+			shExpMatch(host, "*seci-pre.talentomobile.com*") || shExpMatch(host, "*nft.elcorteinglespay.es*") || 
+			shExpMatch(host, "*alantra.com*") ||
+			shExpMatch(host, "*blogproxy.primeriti.es*")
+			) {
+            return "PROXY zsipprivate.eci.geci:80";
+        }
+
+
+
+        // Dominios de zscaler que siempre van a Internet a través de Zscaler
+	    if (shExpMatch(host, "*mobilesupport.zscaler.com*") || shExpMatch(host, "*d32a6ru7mhaq0c.cloudfront.net") ||
+	        shExpMatch(host, "*d3l44rcogcb7iv.cloudfront.net*") || shExpMatch(host, "*mobile.zscaler.net") ||
+	        shExpMatch(host, "*gateway.zscaler.com*") || shExpMatch(host, "*login.zscaler.com") ||
+	        shExpMatch(host, "*congresoseioc.com*") || shExpMatch(host, "*zcc.ecdn.zscaler.com*") ||
+	        shExpMatch(host, "*pac.zscaler.com") || shExpMatch(host, "*gateway.zscaler.net*")) {
+	             return "PROXY zsuser.eci.geci:80";
+            }
+            
+            
+                //Caso especial viajes para que desde Amadeus no usen proxy para estos dominios
+        if (shExpMatch(host, "muc.http.*") || shExpMatch(host, "1a.*") || shExpMatch(host, "*.1a.amadeus.net") || 
+            shExpMatch(host, "*.webchat.savia.es") || shExpMatch(host, "*.iniciarcontrol.com") || 
+            shExpMatch(host, "*.islonline.net") || shExpMatch(host, "*.amadeusvista.com") || 
+            shExpMatch(host, "*.mye-supportcentre.amadeus.com") || shExpMatch(host, "*.amadeuses.com") || 
+            shExpMatch(host, "*.savia.es") || shExpMatch(host, "*.VCVCC.NET") ||
+            shExpMatch(host, "*.cloud-cc.telefonica.es")) {
+                return "DIRECT";
+            }
+           
+		  
+        //Caso especial viajes para que desde Amadeus no usen proxy para estos dominios
+        if (isInNet(host, "181.217.0.0", "255.255.0.0") || isInNet(host, "172.18.0.0", "255.255.0.0") ||
+           (isInNet(myIpAddress(), "10.22.0.0", "255.255.0.0"))||
+            (isInNet(myIpAddress(), "10.23.0.0", "255.255.0.0"))|| (isInNet(myIpAddress(), "10.24.0.0", "255.255.0.0"))||
+            shExpMatch(host, "muc.http.*") || shExpMatch(host, "1a.*") || shExpMatch(host, "*.1a.amadeus.net") || 
+            shExpMatch(host, "*.webchat.savia.es") || shExpMatch(host, "*.iniciarcontrol.com") || 
+            shExpMatch(host, "*.islonline.net") || shExpMatch(host, "*.amadeusvista.com") || 
+            shExpMatch(host, "*.mye-supportcentre.amadeus.com") || shExpMatch(host, "*.amadeuses.com") || 
+            shExpMatch(host, "*.savia.es") || shExpMatch(host, "*.VCVCC.NET") ||
+            shExpMatch(host, "*.cloud-cc.telefonica.es")  ||
+            isInNet(host, "192.168.68.70", "255.255.255.255") || isInNet(host, "192.168.68.12", "255.255.255.255") ||
+            isInNet(host, "192.168.68.13", "255.255.255.255")) {
+                return "DIRECT";
+            }
+            
+        // Dominios que siempre van a Internet a través de Zscaler
+	    if (shExpMatch(host, "*.elcorteingles.es*") ||
+	        shExpMatch(host, "*.elcorteinglespay.es*") || 
+	        shExpMatch(host, "*.ecipay.es*") || 
+	        shExpMatch(host, "*identity-services.financieraelcorteingles.es*") || 
+	        shExpMatch(host, "*cdn.grupoelcorteingles.es*") || shExpMatch(host, "*.elcorteingles.pt*") || shExpMatch(host, "*.alojaemcasa.pt*") ||
+	        shExpMatch(host, "*.bricor.es*") || shExpMatch(host, "*.sfera.com*") ||
+	        shExpMatch(host, "*.hipercor.pt*") || shExpMatch(host, "*.hipercor.es") || shExpMatch(host, "*portal.gruposicor.com") ||
+	        shExpMatch(host, "*.vortal.biz*") || shExpMatch(host, "*.fundacionareces.es") || shExpMatch(host, "*.haier.pt*") ||
+	        shExpMatch(host, "*cdn.nft.grupoelcorteingles.es*") ||
+	        shExpMatch(host, "*pocpre.correos.es") || shExpMatch(host, "*.viajeselcorteingles.*")) {
+	             return "PROXY zsuser.eci.geci:80";
+            }
+        
+        // Redes locales
+        // Empezamos por la general 10/8
+        if ((isInNet(host, "10.0.0.0", "255.0.0.0")) || (isInNet(host, "192.168.0.0", "255.255.0.0")) || 
+            (isInNet(host, "181.220.164.2", "255.255.255.255")) || (isInNet(host, "181.220.164.1", "255.255.255.255")) ||
+            (isInNet(host, "128.28.100.50", "255.255.255.255")) || (isInNet(host, "128.180.0.0", "255.255.0.0")) || 
+            (isInNet(host, "128.181.0.0", "255.255.0.0")) || (isInNet(host, "172.26.0.0", "255.255.0.0")) || 
+            (isInNet(host, "172.16.0.0", "255.240.0.0")) || (isInNet(host, "11.210.5.211", "255.255.255.255")) ||
+            (isInNet(host, "11.158.5.210", "255.255.255.255")) || (isInNet(host, "181.230.250.1", "255.255.255.255")) || 
+            (isInNet(host, "161.10.160.224", "255.255.255.255"))){
+                return "DIRECT";
+        }    
+    
+	
+     /* Desde Red Corporativa ECI. Usando ZEN globales a traves de tunel GRE */
+    return "PROXY zsuser.eci.geci:80";
+    }
+    else {
+       /* usando solo ZCC desde fuera de red corporativa*/
+       return "PROXY ${GATEWAY_FX}:80; PROXY ${SECONDARY_GATEWAY_FX}:80";
+    }
+}
