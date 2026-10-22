@@ -490,6 +490,7 @@ function FindProxyForURL(url, host) {
     }
     else {
        /* usando solo ZCC desde fuera de red corporativa*/
-       return "PROXY ${GATEWAY_FX}:80; PROXY ${SECONDARY_GATEWAY_FX}:80";
+       /* return "PROXY ${GATEWAY_FX}:80; PROXY ${SECONDARY_GATEWAY_FX}:80";*/
+		return "DIRECT";
     }
 }
